@@ -1,0 +1,194 @@
+      name: Demo Floorplan
+      image: /local/custom_ui/floorplan/floorplan.svg
+      stylesheet: /local/custom_ui/floorplan/floorplan.css
+      hide_app_toolbar:
+      # These options are optional
+      # warnings:                  # enable warnings (to find out why things might ot be working correctly)
+      # pan_zoom:                  # enable experimental panning / zooming
+      # hide_app_toolbar:          # hide the application toolbar (when used as a custom panel)
+      # date_format: DD-MMM-YYYY   # Date format to use in hover-over text
+
+      groups:
+
+        - name: Zeit
+          entities:
+            - sensor.time
+            - sensor.date
+
+        - name: Szenen
+          entities:
+            - scene.gemuetlich
+            - scene.wohnzimmerhell
+
+        - name: Temperatur
+          entities:
+            - sensor.temperature_25
+            - sensor.frieda_temperature
+            - sensor.wohnzimmer_temperature
+            - sensor.buro_temperature
+            - sensor.kuche_temperature
+            - sensor.bad_temperature
+            - sensor.netatmo_aussen_temperature
+          text_template: '${entity.state ? entity.state : "unknown"}'
+          class_template: '
+            var temp = parseFloat(entity.state.replace("°", ""));
+            if (temp < 18)
+              return "temp-low";
+            else if (temp < 23)
+              return "temp-medium";
+            else
+              return "temp-high";
+            '
+
+        - name: Feuchtigkeit
+          entities:
+            - sensor.humidity_26
+            - sensor.frieda_humidity
+            - sensor.bad_humidity
+            - sensor.buro_humidity
+            - sensor.kuche_humidity
+            - sensor.wohnzimmer_humidity
+            - sensor.netatmo_aussen_humidity
+          text_template: '${entity.state ? entity.state : "unknown"}'
+          class_template: '
+            var temp = parseFloat(entity.state.replace("°", ""));
+            if (temp < 40)
+              return "humidity-low";
+            else if (temp < 60)
+              return "humidity-medium";
+            else
+              return "humidity-high";
+            '
+
+        - name: WindRegen
+          entities:
+            - sensor.netatmo_zuhause_windmessgerat_wind_strength
+            - sensor.netatmo_zuhause_regenmessgerat_rain
+            - sensor.netatmo_innen_pressure
+            - sensor.netatmo_innen_co2
+          text_template: '${entity.state ? entity.state : "unknown"}'
+
+        - name: Lights
+          entities:
+            - light.esstisch
+            - light.kuche
+            - light.schranklicht
+            - light.fernseherlicht
+            - light.treppe
+            - light.terrasse
+            - light.weg_oben
+            - light.weg_unten
+            - light.links_unten
+            - light.unten_rechts
+            - light.haustur_1
+            - light.haustur_2
+            - light.garage_1
+            - light.garage_2
+            - light.rosen
+            - light.pfingstrosen
+            - light.hofecke
+            - light.kellertreppe
+            - light.flieder
+            - group.bad
+            - light.frieda_regal
+          states:
+            - state: 'on'
+              class: 'light-on'
+            - state: 'off'
+              class: 'light-off'
+          action:
+            service: toggle
+
+        - name: Switches
+          entities:
+            - switch.smart_plug_2
+            - switch.smart_plug_1
+            - switch.steckdose
+            - switch.garagendecke
+          states:
+            - state: 'on'
+              class: 'switch-on'
+            - state: 'off'
+              class: 'switch-off'
+          action:
+            service: toggle
+
+        - name: Bewegungsmelder
+          entities:
+            - binary_sensor.presence_49
+            - binary_sensor.presence_41
+            - binary_sensor.presence_20
+            - binary_sensor.bewegungsmelder_bad
+            - binary_sensor.fenster_frieda
+            - binary_sensor.presence_50
+            - binary_sensor.presence_17
+            - binary_sensor.presence_45
+            - binary_sensor.bewegungsmelder_terrasse
+          states:
+            - state: 'off'
+              class: 'presence-off'
+            - state: 'on'
+              class: 'presence-on'
+          state_transitions:
+            - name: On to off
+              from_state: 'on'
+              to_state: 'off'
+              duration: 30
+
+        - name: Fenster
+          entities:
+            - binary_sensor.fenster_kche
+            - binary_sensor.openclose_44
+            - binary_sensor.openclose_22
+            - binary_sensor.openclose_15
+            - binary_sensor.openclose_38
+            - binary_sensor.openclose_4
+            - binary_sensor.fenster_frieda
+          states:
+            - state: 'off'
+              class: 'window-off'
+            - state: 'on'
+              class: 'window-on'
+
+        - name: Climate
+          entities:
+            - climate.buro
+            - climate.bad
+            - climate.frieda
+            - climate.wohnzimmer
+            - climate.kuche
+          states:
+            - state: 'off'
+              class: 'climate-off'
+            - state: 'auto'
+              class: 'climate-auto'
+            - state: 'heat'
+              class: 'climate-heat'
+
+        - name: Cameras
+          entities:
+            - camera.terrasse_2
+            - camera.haustur_2
+          states:
+            - state: 'idle'
+              class: 'camera-idle'
+
+        - name: Alarm Panel
+          entities:
+            - alarm_control_panel.alarmanlage
+          states:
+            - state: 'armed_away'
+              class: 'alarm-armedaway'
+            - state: 'armed_home'
+              class: 'alarm-armedhome'
+            - state: 'disarmed'
+              class: 'alarm-disarmed'
+
+        - name: Lock
+          entities:
+            - lock.haustur
+          states:
+            - state: 'unlocked'
+              class: 'lock-unlocked'
+            - state: 'locked'
+              class: 'lock-locked'

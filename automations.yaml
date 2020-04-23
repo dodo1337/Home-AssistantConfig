@@ -1,0 +1,1258 @@
+- id: schlafen_gehen
+  alias: Schlafen gehen
+  trigger:
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionName: Schlafen gehen
+  action:
+    service: light.turn_off
+    entity_id: group.all_lights
+- id: Licht Garten
+  alias: Licht Garten
+  trigger:
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionName: Licht Garten
+  action:
+    service: light.toggle
+    entity_id: group.garten
+- id: Heizlüfter an
+  alias: Heizlüfter an
+  trigger:
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionName: Heizlüfter
+  action:
+    service: homeassistant.toggle
+    entity_id: switch.steckdose
+- id: Garagentor
+  alias: Garagentor
+  trigger:
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionName: Garagentor
+  action:
+    service: homeassistant.toggle
+    entity_id: cover.smart_garage_door_opener_channel_0
+- id: alarmanlage_away
+  alias: Trigger alarm while armed away
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.openclose_22
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_6
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_4
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_5
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_14
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_15
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.alarmanlage
+    state: armed_away
+  action:
+  - service: alarm_control_panel.alarm_trigger
+    entity_id: alarm_control_panel.alarmanlage
+- id: alarmanlage_home
+  alias: Trigger alarm while armed home
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.openclose_22
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_6
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_4
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_5
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.openclose_15
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.alarmanlage
+    state: armed_home
+  action:
+  - service: alarm_control_panel.alarm_trigger
+    entity_id: alarm_control_panel.alarmanlage
+- id: alarmanlage_triggered_notify_alarm
+  alias: alarm triggered notify and alarming
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    to: triggered
+  action:
+  - service: notify.all_devices
+    data:
+      message: Einbruch!
+      title: Alarmanlage
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.flash_run_alarm
+  - service: script.turn_on
+    entity_id:
+    - script.flash_room1
+- id: alarmanlage_disarm_notify_stop
+  alias: Disarm Notify and Stop Alarm
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    from: triggered
+    to: disarmed
+  action:
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.flash_run_alarm
+  - service: script.turn_off
+    entity_id:
+    - script.flash_room1
+    - script.flash_loop
+  - service: script.turn_on
+    entity_id:
+    - script.flash_end
+  - service: notify.all_devices
+    data:
+      message: Deaktiviert!
+      title: Alarmanlage
+- id: alarmanlage_disarm
+  alias: Disarm
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    from: armed_home
+    to: disarmed
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    from: armed_away
+    to: disarmed
+  action:
+  - service: notify.all_devices
+    data:
+      message: Deaktiviert!
+      title: Alarmanlage
+- id: alarmanlage_notify_armed_home
+  alias: Send notification when armed home
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    to: armed_home
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Im Home Modus aktiv!
+      title: Alarmanlage
+- id: alarmanlage_notify_armed_away
+  alias: Send notification when armed away
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    to: armed_away
+  action:
+  - service: notify.all_devices
+    data:
+      message: Im Away Modus aktiv!
+      title: Alarmanlage
+- id: alarmanlage_notify_pending
+  alias: Send notification when pending
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarmanlage
+    to: pending
+  action:
+  - service: notify.all_devices
+    data:
+      message: Im Pending Modus!
+      title: Alarmanlage
+- id: arm_home
+  alias: arm_home
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switch
+      event: 1002
+  action:
+  - service: alarm_control_panel.alarm_arm_home
+    entity_id: alarm_control_panel.alarmanlage
+- id: arm_away
+  alias: arm_away
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switch
+      event: 1004
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    entity_id: alarm_control_panel.alarmanlage
+- id: disarm
+  alias: disarm
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switch
+      event: 1003
+  action:
+  - service: alarm_control_panel.alarm_disarm
+    entity_id: alarm_control_panel.alarmanlage
+- id: flash_room1_start
+  alias: flash_room1_start
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switc
+      event: 1002
+  action:
+    service: script.turn_on
+    entity_id: script.flash_room1
+- id: flash_room1_stop
+  alias: flash_room1_stop
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switc
+      event: 1004
+  action:
+    service: script.turn_off
+    entity_id: script.flash_room1
+- id: start_homekit
+  alias: Start HomeKit
+  trigger:
+  - platform: homeassistant
+    event: start
+  action:
+  - delay: 00:05
+  - service: homekit.start
+- id: balkontuer_zu_15min
+  alias: Balkontür zu 15min
+  trigger:
+    platform: state
+    entity_id: binary_sensor.openclose_14
+    to: 'on'
+    for:
+      minutes: 15
+  condition:
+    condition: numeric_state
+    entity_id: sensor.temperature_7
+    below: 18
+  action:
+  - data:
+      message: Du lüftest schon 15 min
+      title: Balkontür schließen
+    service: notify.all_devices
+- id: bewegung_flur
+  alias: Bewegung Flur
+  trigger:
+  - entity_id: binary_sensor.presence_41
+    platform: state
+    to: 'on'
+  - entity_id: binary_sensor.bewegungsmelder_treppe
+    platform: state
+    to: 'on'
+  condition:
+  - below: '10'
+    condition: numeric_state
+    entity_id: sensor.lightlevel_43
+  action:
+  - data:
+      brightness: 254
+      color_temp: 366
+    entity_id:
+    - light.treppe
+    service: homeassistant.turn_on
+- id: bewegung_flur_aus
+  alias: Bewegung Flur aus
+  trigger:
+  - entity_id: binary_sensor.presence_41
+    for: 0:02:00
+    platform: state
+    to: 'off'
+  - entity_id: binary_sensor.bewegungsmelder_treppe
+    for: 0:02:00
+    platform: state
+    to: 'off'
+  condition:
+  - entity_id: sensor.bewegungsmelder_treppe
+    condition: numeric_state
+    below: '40'
+  action:
+  - service: homeassistant.turn_on
+    entity_id:
+    - light.treppe
+    data:
+      brightness: 77
+      color_temp: 436
+  - condition: and
+    conditions:
+    - after: 00:10:00
+      condition: time
+    - before: sunrise
+      condition: sun
+  - service: homeassistant.turn_off
+    entity_id:
+    - light.treppe
+- id: bewegung_küche
+  alias: Bewegung Küche
+  trigger:
+  - entity_id: binary_sensor.presence_20
+    platform: state
+    to: 'on'
+  condition:
+  - entity_id: sensor.lightlevel_16
+    condition: numeric_state
+    below: '50'
+  action:
+  - service: homeassistant.turn_on
+    entity_id:
+    - light.kuche
+    data:
+      brightness: 254
+      color_temp: 366
+- id: bewegung_küche_aus
+  alias: Bewegung Küche aus
+  trigger:
+  - entity_id: binary_sensor.presence_20
+    platform: state
+    for: 0:02:00
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - light.kuche
+- id: bewegung_keller
+  alias: Bewegung Keller
+  trigger:
+    entity_id: binary_sensor.presence_2
+    platform: state
+    to: 'on'
+  condition:
+    entity_id: sensor.lightlevel_3
+    condition: numeric_state
+    below: 15
+  action:
+  - service: homeassistant.turn_on
+    entity_id:
+    - light.kellerflur
+    - light.keller
+    - light.waschraum
+    data:
+      brightness: 254
+      color_temp: 366
+- id: bewegung_keller_aus
+  alias: Bewegung Keller aus
+  trigger:
+  - entity_id: binary_sensor.presence_2
+    platform: state
+    for: 0:10:00
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - light.kellerflur
+    - light.keller
+    - light.waschraum
+- id: weihnachtsbeleuchtung_an
+  alias: Weihnachtsbeleuchtung an
+  trigger:
+  - below: '20'
+    entity_id: sensor.sensor_weg_light_level
+    for: 0:05:00
+    platform: numeric_state
+  condition:
+  - condition: and
+    conditions:
+    - after: 06:00:00
+      condition: time
+    - before: '23:00:00'
+      condition: time
+  action:
+  - entity_id: switch.meross_steckdose
+    service: homeassistant.turn_on
+  - data:
+      message: Weihnachtsbeleuchtung wurde angeschaltet!
+      title: Weihnachtsbeleuchtung
+    service: notify.all_ios_devices
+- id: treppenlicht_sunset
+  alias: Treppenlicht Sunset
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.lightlevel_16
+    below: 10
+    for:
+      minutes: 5
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 07:00:00
+    - condition: time
+      before: '23:00:00'
+  action:
+  - service: homeassistant.turn_on
+    entity_id: light.treppe
+    data:
+      brightness: 107
+      color_temp: 436
+  - service: notify.all_admin_devices
+    data:
+      message: Licht Treppe wurde angeschaltet!
+      title: Sonnenuntergang
+- id: bewegung_haustur
+  alias: Bewegung Haustür
+  trigger:
+  - entity_id: binary_sensor.presence_17
+    platform: state
+    to: 'on'
+  condition:
+  - after: sunset
+    before: sunrise
+    condition: sun
+  action:
+  - data:
+      brightness: 254
+      color_temp: 366
+    entity_id:
+    - group.haustur
+    - group.weg
+    service: homeassistant.turn_on
+  - data:
+      message: An der Hasutür wurde Bewegung erkannt - Licht an!
+      title: Haustür
+    service: notify.all_ios_devices
+- id: bewegung_haustur_aus
+  alias: Bewegung Haustür aus
+  trigger:
+  - entity_id: binary_sensor.presence_17
+    for: 0:05:00
+    platform: state
+    to: 'off'
+  condition:
+  - after: sunset
+    before: sunrise
+    condition: sun
+  action:
+  - data:
+      message: Keine Bewegung mehr - Licht aus!
+      title: Haustür
+    service: notify.all_admin_devices
+  - entity_id:
+    - group.haustur
+    - group.weg
+    service: homeassistant.turn_off
+- id: bewegung_hof
+  alias: Bewegung Hof
+  trigger:
+  - entity_id: binary_sensor.sensor_hof_motion
+    platform: state
+    to: 'on'
+  condition:
+  - after: sunset
+    before: sunrise
+    condition: sun
+  action:
+  - data:
+      brightness: 254
+      color_temp: 366
+    entity_id:
+    - group.hof
+    - light.rosen
+    service: homeassistant.turn_on
+  - data:
+      message: Im Hof wurde Bewegung erkannt - Licht an!
+      title: Hof
+    service: notify.all_devices
+- id: bewegung_hof_aus
+  alias: Bewegung Hof aus
+  trigger:
+  - entity_id: binary_sensor.sensor_hof_motion
+    for: 0:05:00
+    platform: state
+    to: 'off'
+  condition:
+  - after: sunset
+    before: sunrise
+    condition: sun
+  action:
+  - entity_id:
+    - group.hof
+    service: homeassistant.turn_off
+  - condition: state
+    entity_id: binary_sensor.presence_17
+    for:
+      minutes: 2
+    state: 'off'
+  - entity_id:
+    - light.rosen
+    service: homeassistant.turn_off
+  - data:
+      message: Keine Bewegung mehr - Licht aus!
+      title: Hof
+    service: notify.all_admin_devices
+- id: hue_schalter1
+  alias: Hue Schalter1
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 1002
+  condition:
+  action:
+  - service: scene.turn_on
+    entity_id: scene.KuecheundTisch
+- id: hue_schalter2
+  alias: Hue Schalter2
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 2002
+  condition:
+  action:
+  - service: light.turn_on
+    entity_id: group.garten
+- id: hue_schalter3
+  alias: Hue Schalter3
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 3002
+  condition:
+  action:
+  - service: scene.turn_on
+    entity_id: scene.gemuetlich
+- id: hue_schalter4
+  alias: Hue Schalter4
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 4002
+  condition:
+  action:
+  - service: scene.turn_on
+    entity_id: scene.wohnzimmerhell
+- id: hue_schalter1hold
+  alias: Hue Schalter1hold
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 1003
+  condition:
+  action:
+  - service: scene.turn_on
+    entity_id: scene.frieda_holen
+- id: hue_schalter2hold
+  alias: Hue Schalter2hold
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 2003
+  condition:
+  action:
+  - service: scene.turn_on
+    entity_id: scene.frieda_oben
+- id: hue_schalter3hold
+  alias: Hue Schalter3hold
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 3003
+  condition:
+  action:
+  - service: scene.turn_on
+    entity_id: scene.GemuetlichHell
+- id: hue_schalter4hold
+  alias: Hue Schalter4hold
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: dimmschalter
+      event: 4003
+  condition:
+  action:
+  - entity_id:
+    - switch.smart_plug_2
+    - switch.smart_plug_1
+    - light.fernseherlicht
+    - light.schranklicht
+    - light.kuche
+    - light.esstisch
+    service: homeassistant.turn_off
+- id: isabell_leaving_home
+  alias: Isabell Leaving Home
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.home
+    event: leave
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell verlässt Zuhause
+- id: isabell_home
+  alias: Isabell coming home
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.home
+    event: enter
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell kommt nach Hause
+- id: isabell_leaving_kapellen
+  alias: Isabell Leaving Kapellen
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.kapellen
+    event: leave
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell verlässt Kapellen
+- id: isabell_kapellen
+  alias: Isabell coming kapellen
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.kapellen
+    event: enter
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell kommt nach Kapellen
+- id: isabell_leaving_karlsruhe
+  alias: Isabell Leaving Karlsruhe
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.karlsruhe
+    event: leave
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell verlässt Karlsruhe
+- id: isabell_karlsruhe
+  alias: Isabell coming Karlsruhe
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.karlsruhe
+    event: enter
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell kommt nach Karlsruhe
+- id: isabell_leaving_landau
+  alias: Isabell Leaving Landau
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.landau
+    event: leave
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell verlässt Landau
+- id: isabell_landau
+  alias: Isabell coming Landau
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.landau
+    event: enter
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell kommt nach Landau
+- id: isabell_leaving_bza
+  alias: Isabell Leaving Bza
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.bad_bergzabern
+    event: leave
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell verlässt Bad Bergzabern
+- id: isabell_bza
+  alias: Isabell coming Bza
+  trigger:
+    platform: zone
+    entity_id: device_tracker.isabell_isabells7_2
+    zone: zone.bad_bergzabern
+    event: enter
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Isabell
+      message: Isabell kommt nach Bad Bergzabern
+- id: lueften_feuchtigkeit
+  alias: Kellerfenster öffnen Aussenluft trockener
+  trigger:
+    platform: template
+    value_template: '{{states(''sensor.terrasse_absolutehumidity'')|float < (states(''sensor.waescheraum_absolutehumidity'')|float)}}'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.temperature_7
+    above: 19
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Keller lüften!
+      message: Luft draußen ({{states('sensor.terrasse_absolutehumidity')|float}})
+        ist trockener als drinnen ({{states('sensor.waescheraum_absolutehumidity')|float}})
+- id: lueften_feuchtigkeit_zu
+  alias: Kellerfenster schließen Aussenluft feuchter
+  trigger:
+    platform: template
+    value_template: '{{states(''sensor.terrasse_absolutehumidity'')|float > (states(''sensor.waescheraum_absolutehumidity'')|float)}}'
+  action:
+  - service: notify.all_admin_devices
+    data:
+      title: Kellerfenster schließen!
+      message: Luft draußen ({{states('sensor.terrasse_absolutehumidity')|float}})
+        ist feuchter als drinnen ({{states('sensor.waescheraum_absolutehumidity')|float}})
+- id: schlafzimmerfenster_zu_hitze
+  alias: Schlafzimmerfenster schließen Hitze
+  trigger:
+  - platform: template
+    value_template: '{{states(''sensor.schlafzimmer_temperature'')|float < (states(''sensor.netatmo_aussen_temperature'')|float)}}'
+  condition:
+  - above: '22'
+    condition: numeric_state
+    entity_id: sensor.netatmo_aussen_temperature
+  action:
+  - data:
+      message: Luft draußen ({{states('sensor.netatmo_aussen_temperature')|float}})
+        ist wärmer als drinnen ({{states('sensor.schlafzimmer_temperature')|float}})
+      title: Schlafzimmerfenster schließen!
+    service: notify.all_devices
+- id: schlafzimmerfenster_auf_hitze
+  alias: Schlafzimmerfenster öffnen Hitze
+  trigger:
+  - platform: template
+    value_template: '{{states(''sensor.schlafzimmer_temperature'')|float > (states(''sensor.netatmo_aussen_temperature'')|float)}}'
+  condition:
+  - above: '22'
+    condition: numeric_state
+    entity_id: sensor.netatmo_aussen_temperature
+  action:
+  - data:
+      message: Luft draußen ({{states('sensor.netatmo_aussen_temperature')|float}})
+        ist kälter als drinnen ({{states('sensor.schlafzimmer_temperature')|float}})
+      title: Schlafzimmer lüften!
+    service: notify.all_devices
+- id: '1572638224609'
+  alias: Heizung aus Wohnzimmer Tür auf
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_4
+    for: 00:01:00
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.wohnzimmer
+      hvac_mode: 'off'
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Wohnzimmer
+      message: Terrassentür ist offen - Heizung aus!
+- id: '1572639056323'
+  alias: Heizung an Wohnzimmer Tür zu
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_4
+    for: 00:01:00
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.wohnzimmer
+      hvac_mode: auto
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Wohnzimmer
+      message: Terrassentür ist zu - Heizung an!
+- id: heizung_aus_schlafzimmer_tür_auf
+  alias: Heizung aus Schlafzimmer Tür auf
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_14
+    for: 00:01:00
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.schlafzimmer
+      hvac_mode: 'off'
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Schlafzimmer
+      message: Balkontür ist offen - Heizung aus!
+- id: heizung_an_schlafzimmer_tür_zu
+  alias: Heizung an Schlafzimmer Tür zu
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_14
+    for: 00:01:00
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.schlafzimmer
+      hvac_mode: auto
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Schlafzimmer
+      message: Balkontür ist zu - Heizung an!
+- id: heizung_aus_badfenster_auf
+  alias: Heizung aus Badfenster auf
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_15
+    for: 00:01:00
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.bad
+      hvac_mode: 'off'
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Bad
+      message: Badfenster ist offen - Heizung aus!
+- id: heizung_an_badfenster_zu
+  alias: Heizung an Badfenster zu
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_15
+    for: 00:01:00
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.bad
+      hvac_mode: auto
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Bad
+      message: Badfenster ist zu - Heizung an!
+- id: badfenster_zu_15min
+  alias: badfenster zu 15min
+  trigger:
+    platform: state
+    entity_id: binary_sensor.openclose_15
+    to: 'on'
+    for:
+      minutes: 15
+  condition:
+    condition: numeric_state
+    entity_id: sensor.temperature_7
+    below: 20
+  action:
+  - data:
+      message: Du lüftest schon 15 min
+      title: Badfenster schließen
+    service: notify.all_devices
+- id: '1573389842863'
+  alias: Automatic switch off
+  description: ''
+  trigger:
+  - entity_id: switch.steckdose
+    for: 00:05:00
+    from: 'off'
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: switch.steckdose
+    service: homeassistant.turn_off
+- id: '1576885420572'
+  alias: Weihnachtsbeleuchtung aus Nacht
+  description: Weihnachtsbeleuchtung aus Nacht
+  trigger:
+  - at: '23:01'
+    platform: time
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    entity_id: switch.meross_steckdose
+    data: {}
+- id: '1576885502771'
+  alias: Treppenlicht ausschalten Nacht
+  description: Treppenlicht ausschalten Nacht
+  trigger:
+  - at: 00:10
+    platform: time
+  condition: []
+  action:
+  - entity_id: light.treppe
+    service: homeassistant.turn_off
+- id: bewegung_garage_aus
+  alias: Bewegung Garage aus
+  trigger:
+  - entity_id: binary_sensor.presence_45
+    for: 0:03:00
+    from: 'on'
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - entity_id:
+    - switch.garagendecke
+    service: homeassistant.turn_off
+- id: bewegung_garage
+  alias: Bewegung Garage
+  trigger:
+  - entity_id: binary_sensor.presence_45
+    platform: state
+    to: 'on'
+  condition:
+  - below: '50'
+    condition: numeric_state
+    entity_id: sensor.lightlevel_47
+  action:
+  - entity_id:
+    - switch.garagendecke
+    service: homeassistant.turn_on
+- id: heizung_aus_fensterwaschraum_auf
+  alias: Heizung aus Fenster Waschraum auf
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_5
+    for: 00:01:00
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.wascheraum
+      hvac_mode: 'off'
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Waschraum
+      message: Fenster Waschraum ist offen - Heizung aus!
+- id: waschraumfenster_zu_30min
+  alias: Waschraumfenster zu 30min
+  trigger:
+  - entity_id: binary_sensor.openclose_5
+    for: 0:30:00
+    platform: state
+    to: 'on'
+  condition:
+  - below: '18'
+    condition: numeric_state
+    entity_id: sensor.temperature_7
+  action:
+  - data:
+      message: Du lüftest schon 30 min
+      title: Fenster Waschraum schließen
+    service: notify.all_devices
+- id: heizung_an_fensterwaschraum_zu
+  alias: Heizung an Fenster Waschraum zu
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.openclose_5
+    for: 00:01:00
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.wascheraum
+      hvac_mode: auto
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Waschraum
+      message: Fenster Waschraum ist zu - Heizung an!
+- id: bewegung_garten
+  alias: Bewegung Garten
+  trigger:
+  - entity_id: binary_sensor.bewegungsmelder_terrasse
+    platform: state
+    to: 'on'
+  condition:
+  - after: sunset
+    before: sunrise
+    condition: sun
+  action:
+  - data:
+      brightness: 254
+      color_temp: 366
+    entity_id:
+    - group.garten
+    service: homeassistant.turn_on
+  - data:
+      message: Auf der Terrasse wurde Bewegung erkannt - Licht an!
+      title: Terrasse
+    service: notify.all_devices
+- id: bewegung_garten_aus
+  alias: Bewegung Garten aus
+  trigger:
+  - entity_id: binary_sensor.bewegungsmelder_terrasse
+    for: 0:05:00
+    from: 'on'
+    platform: state
+    to: 'off'
+  condition:
+  - after: sunset
+    before: sunrise
+    condition: sun
+  action:
+  - entity_id:
+    - group.garten
+    service: homeassistant.turn_off
+  - data:
+      message: Keine Bewegung mehr - Licht aus!
+      title: Terrasse
+    service: notify.all_admin_devices
+- id: sonnenaufgang_schlafzimmer
+  alias: Sonnenaufgang Schlafzimmer
+  trigger:
+  - event: sunrise
+    offset: -00:20:00
+    platform: sun
+  action:
+  - data:
+      brightness: 1
+      kelvin: 2800
+    entity_id:
+    - light.hue_lightstrip_1
+    - light.ambiance_eingang_1
+    service: light.turn_on
+  - data:
+      brightness: 255
+      kelvin: 2800
+      transition: 1500
+    entity_id:
+    - light.hue_lightstrip_1
+    - light.ambiance_eingang_1
+    service: light.turn_on
+- id: Schlafzimmer an
+  alias: schlafzimmer_an
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switch_2
+      event: 1004
+  action:
+  - service: scene.turn_on
+    entity_id: scene.ins_bett_gehen
+- id: Schlafzimmer aus
+  alias: schlafzimmer_aus
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switch_2
+      event: 1003
+  action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - light.schlafzimmer_decke
+    - light.bett
+    - light.nachttisch
+- id: Schlafzimmer Nachtlicht
+  alias: schlafzimmer_nachtlicht
+  trigger:
+    platform: event
+    event_type: deconz_event
+    event_data:
+      id: smart_switch_2
+      event: 1002
+  action:
+  - service: scene.turn_on
+    entity_id: scene.nachtlicht_schlafzimmer
+- id: bewegung_bad
+  alias: Bewegung Bad
+  trigger:
+  - entity_id: binary_sensor.bewegungsmelder_bad
+    platform: state
+    to: 'on'
+  condition:
+  - entity_id: sensor.bewegungsmelder_bad
+    condition: numeric_state
+    below: '300'
+  action:
+  - service: homeassistant.turn_on
+    entity_id:
+    - light.color_temperature_light_4
+    - light.color_temperature_light_5
+    - light.extended_color_light_3
+    data:
+      brightness: 254
+      color_temp: 366
+- id: bewegung_bad_aus
+  alias: Bewegung Bad aus
+  trigger:
+  - entity_id: binary_sensor.bewegungsmelder_bad
+    platform: state
+    for: 0:05:00
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - light.color_temperature_light_4
+    - light.color_temperature_light_5
+    - light.extended_color_light_3
+- id: bewegung_ankleide
+  alias: Bewegung Ankleide
+  trigger:
+  - entity_id: binary_sensor.presence_34
+    platform: state
+    to: 'on'
+  condition:
+  - entity_id: sensor.lightlevel_33
+    condition: numeric_state
+    below: '30'
+  action:
+  - service: homeassistant.turn_on
+    entity_id:
+    - light.ankleide_1
+    - light.ankleide_2
+    - light.ankleide_farbe
+    data:
+      brightness: 254
+      color_temp: 366
+- id: bewegung_ankleide_aus
+  alias: Bewegung Ankleide aus
+  trigger:
+  - entity_id: binary_sensor.presence_34
+    platform: state
+    for: 0:02:00
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - light.ankleide_1
+    - light.ankleide_2
+    - light.ankleide_farbe
+- id: briefkasten
+  alias: briefkasten
+  trigger:
+    platform: state
+    entity_id: binary_sensor.vibration_19
+    to: 'on'
+  action:
+  - service: notify.all_devices
+    data:
+      title: Briefkasten
+      message: Die Post war da!
+- id: heizung_aus_fenster_frieda_auf
+  alias: Heizung aus Fenster Frieda auf
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.fenster_frieda
+    for: 00:01:00
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: climate.frieda
+      hvac_mode: 'off'
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Frieda
+      message: Fenster Frieda ist offen - Heizung aus!
+- id: reminder_fenster_frieda_zu
+  alias: Reminder Fenster Frieda zu
+  trigger:
+  - entity_id: binary_sensor.fenster_frieda
+    platform: state
+    to: 'on'
+    for: 0:15:00
+  condition:
+  - entity_id: sensor.netatmo_aussen_temperature
+    condition: numeric_state
+    below: '18'
+  action:
+  - service: notify.all_devices
+    data:
+      title: Fenster Frieda schließen
+      message: Du lüftest schon 15 min
+- id: heizung_an_fenster_frieda_zu
+  alias: Heizung an Fenster Frieda zu
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.fenster_frieda
+    platform: state
+    to: 'off'
+    for: 00:01:00
+  condition: []
+  action:
+  - data:
+      entity_id: climate.frieda
+      hvac_mode: auto
+    service: climate.set_hvac_mode
+  - service: notify.all_ios_devices
+    data:
+      title: Frieda's Zimmer
+      message: Fenster Frieda ist zu - Heizung an!

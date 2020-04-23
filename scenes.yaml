@@ -1,0 +1,228 @@
+- name: Frieda_holen
+  entities:
+    light.frieda_regal: true
+  id: 8d3fa847ea6b44be9023ca298f620d43
+- name: Frieda_oben
+  entities:
+    light.frieda_regal: false
+  id: a397543a9a6541b5a85bd0349c70cc1c
+- name: KuecheundTisch
+  entities:
+    light.esstisch: true
+    light.kuche: true
+    light.fernseherlicht: false
+    light.schranklicht: false
+    switch.smart_plug_1: false
+  id: 31096d89513c4c5a8d4d46b814ac7895
+- name: WohnzimmerHell
+  entities:
+    light.esstisch: true
+    light.kuche: true
+    light.fernseherlicht: true
+    light.schranklicht: true
+    switch.smart_plug_1: true
+  id: fe4b3f97c07a4a0a816da629ad0115e8
+- name: Abendessen
+  entities:
+    light.esstisch: true
+    light.kuche: false
+    light.fernseherlicht: false
+    light.schranklicht: false
+    switch.smart_plug_1: false
+  id: 3c75067b93f74a358f77b71abec2a816
+- name: Gemuetlich
+  entities:
+    light.esstisch: false
+    light.kuche: false
+    light.fernseherlicht: true
+    light.schranklicht: true
+    switch.smart_plug_1: true
+  id: 1f2c0de039914e58994629b1300e42a9
+- name: GemuetlichHell
+  entities:
+    light.esstisch: true
+    light.kuche: false
+    light.fernseherlicht: true
+    light.schranklicht: true
+    switch.smart_plug_1: true
+  id: 21f9bc0c9f634d369095f69ba53d6f63
+- id: '1578337356042'
+  name: Ins Bett gehen
+  entities:
+    light.bett:
+      brightness: 129
+      effect_list:
+      - colorloop
+      friendly_name: Bett
+      hs_color:
+      - 31.059
+      - 100
+      is_deconz_group: false
+      rgb_color:
+      - 255
+      - 132
+      - 0
+      state: 'on'
+      supported_features: 61
+      xy_color:
+      - 0.606
+      - 0.379
+    light.nachttisch:
+      brightness: 131
+      effect_list:
+      - colorloop
+      friendly_name: Nachttisch
+      hs_color:
+      - 31.059
+      - 100
+      is_deconz_group: false
+      rgb_color:
+      - 255
+      - 132
+      - 0
+      state: 'on'
+      supported_features: 61
+      xy_color:
+      - 0.606
+      - 0.379
+    light.schlafzimmer_decke:
+      brightness: 130
+      color_temp: 454
+      friendly_name: Schlafzimmer Decke
+      is_deconz_group: false
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 43
+- id: '1578338457093'
+  name: Nachtlicht Schlafzimmer
+  entities:
+    light.schlafzimmer_decke:
+      friendly_name: Schlafzimmer Decke
+      max_mireds: 500
+      min_mireds: 153
+      state: 'off'
+      supported_features: 43
+    light.nachttisch:
+      effect_list:
+      - colorloop
+      - random
+      friendly_name: Nachttisch
+      state: 'off'
+      supported_features: 61
+    light.bett:
+      brightness: 48
+      effect: none
+      effect_list:
+      - colorloop
+      - random
+      friendly_name: Bett
+      hs_color:
+      - 1.918
+      - 85.882
+      rgb_color:
+      - 255
+      - 43
+      - 36
+      state: 'on'
+      supported_features: 61
+      xy_color:
+      - 0.677
+      - 0.304
+- id: '1583786217237'
+  name: Bad abgedunkelt
+  entities:
+    light.color_temperature_light_4:
+      brightness: 157
+      color_temp: 454
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 43
+    light.color_temperature_light_5:
+      brightness: 157
+      color_temp: 454
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 43
+    light.extended_color_light_3:
+      brightness: 157
+      color_temp: 500
+      effect: none
+      effect_list:
+      - colorloop
+      - random
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 63
+- id: '1583786317731'
+  name: Bad Hell
+  entities:
+    light.color_temperature_light_4:
+      brightness: 254
+      color_temp: 363
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 43
+    light.color_temperature_light_5:
+      brightness: 254
+      color_temp: 362
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 43
+    light.extended_color_light_3:
+      brightness: 254
+      color_temp: 368
+      effect: none
+      effect_list:
+      - colorloop
+      - random
+      max_mireds: 500
+      min_mireds: 153
+      state: 'on'
+      supported_features: 63
+- id: '1583788986801'
+  name: Wohnzimmer Abendstimmung
+  entities:
+    light.fernseherlicht:
+      brightness: 156
+      effect: none
+      effect_list:
+      - colorloop
+      - random
+      friendly_name: Fernseherlicht
+      hs_color:
+      - 30.593
+      - 99.216
+      rgb_color:
+      - 255
+      - 131
+      - 1
+      state: 'on'
+      supported_features: 61
+      xy_color:
+      - 0.607
+      - 0.378
+    light.schranklicht:
+      brightness: 179
+      effect: none
+      effect_list:
+      - colorloop
+      - random
+      friendly_name: Schranklicht
+      hs_color:
+      - 30.593
+      - 99.216
+      rgb_color:
+      - 255
+      - 131
+      - 1
+      state: 'on'
+      supported_features: 61
+      xy_color:
+      - 0.607
+      - 0.378

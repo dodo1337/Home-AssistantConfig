@@ -1,0 +1,68 @@
+alarm_room1:
+  alias: Alarm room1
+  sequence:
+  - alias: Alarm Room1 Start
+    service: homeassistant.turn_on
+    data:
+      entity_id: 
+#       - sound
+        - script.flash_room1
+  - delay:
+          # time interval for alarm sound and light flashing
+      seconds: 1000
+  - alias: Alarm Room1 Stop
+    service: homeassistant.turn_off
+    data:
+      entity_id:
+        - script.flash_loop
+        - script.flash_room1
+
+flash_room1:
+  alias: Flash Room1 On
+  sequence:
+    - condition: state
+      entity_id: input_boolean.flash_run_alarm
+      state: 'on'
+    - alias: Light Room1 On
+      service: light.turn_on
+      data:
+        entity_id: light.kuche_2
+        brightness: 255
+        rgb_color: [255,0,0]
+    - delay:
+          # time for flash light on
+        milliseconds: 500
+    - alias: Light Room1 Off
+      service: light.turn_on
+      data:
+        entity_id: light.kuche_2
+        brightness: 255
+        rgb_color: [255,210,129]
+    - alias: loop_room1
+      service: script.turn_on
+      data:
+        entity_id: script.flash_loop
+        
+flash_end:
+  alias: Flash End
+  sequence:
+    - delay:
+          # time for flash light on
+        milliseconds: 500
+    - alias: Light to normal
+      service: light.turn_on
+      data:
+        entity_id: light.kuche_2
+        brightness: 255
+        rgb_color: [255,210,129]
+
+flash_loop:
+  alias: Flash loop
+  sequence:
+    - delay:
+          # time for flash light off
+        milliseconds: 500
+    - alias: loop_room1
+      service: script.turn_on
+      data:
+        entity_id: script.flash_room1

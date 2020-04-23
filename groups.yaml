@@ -1,0 +1,112 @@
+#default_view:
+#  view: yes
+#  entities:
+#    - group.Huesensor
+#    - group.all_light
+#    - group.climate
+#
+#Light:
+#  name: Lights
+#  icon: mdi:lightbulb-on
+#  view: yes
+#  entities:
+#    - light.ambiance_eingang_1
+#
+#Huesensor:
+#  entities:
+#    - binary_sensor.sensor_motion_hof
+#    - binary_sensor.sensor_motion_weg
+#    - sensor.hof_temperature
+#    - sensor.hof_light_level
+#    - sensor.eingang_temperature
+#    - sensor.eingang_light_level
+Haustür:
+  entities:
+    - light.haustur_1
+    - light.haustur_2
+    
+Bad:
+  entities:
+    - light.color_temperature_light_4
+    - light.color_temperature_light_5
+    - light.extended_color_light_3
+    
+Ankleide:
+  entities:
+    - light.ankleide_1
+    - light.ankleide_2
+    - light.ankleide_farbe
+
+Hof:
+  entities:
+    - light.garage_1
+    - light.garage_2
+    - light.hofecke
+
+Weg:
+  entities:
+    - light.rosen
+    - light.pfingstrosen
+    - light.flieder
+    
+Garten:
+  entities:
+    - light.weg_oben
+    - light.weg_unten
+    - light.terrasse
+    - light.links_unten
+    - light.unten_rechts
+    - light.kellertreppe
+    
+Alarm:
+  entities:
+    - light.weg_oben
+    - light.weg_unten
+    - light.terrasse
+    - light.links_unten
+    - light.unten_rechts
+    - light.kellertreppe
+    - light.garage_1
+    - light.garage_2
+    - light.hofecke
+    - light.rosen
+    - light.pfingstrosen
+    - light.flieder
+    - light.haustur_1
+    - light.haustur_2
+    - light.color_temperature_light_4
+    - light.color_temperature_light_5
+    - light.extended_color_light_3
+    - light.ankleide_1
+    - light.ankleide_2
+    - light.ankleide_farbe
+    - light.kuche
+    - light.esstisch
+    - light.schranklicht
+    - light.fernseherlicht
+    - light.frieda_regal
+    - light.treppe
+    - light.keller
+    - light.kellerflur
+    - light.waschraum
+    
+Aussen:
+  entities:
+    - light.weg_oben
+    - light.weg_unten
+    - light.terrasse
+    - light.links_unten
+    - light.unten_rechts
+    - light.kellertreppe
+    - light.garage_1
+    - light.garage_2
+    - light.hofecke
+    - light.rosen
+    - light.pfingstrosen
+    - light.flieder
+    - light.haustur_1
+    - light.haustur_2
+
+#Schlafzimmer:
+#  entities:
+#    - 

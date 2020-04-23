@@ -1,0 +1,420 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret latitude
+  longitude: !secret longitude
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 0
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/Berlin
+  # Customization file
+  customize: !include customize.yaml
+  whitelist_external_dirs:
+    - /config
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Show the introduction message on startup.
+#introduction:
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+# http:
+#   base_url: example.duckdns.org:8123
+
+#logger:
+
+# Sensors
+sensor:  
+  - platform: history_stats
+    name: Briefkasten heute
+    entity_id: binary_sensor.vibration_19
+    state: 'on'
+    type: count
+    start: '{{ now().replace(hour=0, minute=0, second=0) }}'
+    end: '{{ now() }}'
+  - platform: fritzbox_callmonitor
+    host: 192.168.178.1
+  - platform: fritzbox_netmonitor
+    host: 192.168.178.1
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+  - platform: thermal_comfort
+    sensors:
+      wascheraum:
+        friendly_name: Wäscheraum Thermal
+        temperature_sensor: sensor.wascheraum_temperature
+        humidity_sensor: sensor.wascheraum_humidity
+      terrasse:
+        friendly_name: Terrasse Thermal
+        temperature_sensor: sensor.temperature_7
+        humidity_sensor: sensor.humidity_8
+      keller:
+        friendly_name: Keller Thermal
+        temperature_sensor: sensor.keller_temperature
+        humidity_sensor: sensor.keller_humidity
+      werkzeugraum:
+        friendly_name: Werkzeugraum Thermal
+        temperature_sensor: sensor.temperature_10
+        humidity_sensor: sensor.humidity_11
+      bad:
+        friendly_name: Bad Thermal
+        temperature_sensor: sensor.bad_temperature
+        humidity_sensor: sensor.bad_humidity
+      buro:
+        friendly_name: Büro Thermal
+        temperature_sensor: sensor.buro_temperature
+        humidity_sensor: sensor.buro_humidity
+      frieda:
+        friendly_name: Frieda Thermal
+        temperature_sensor: sensor.frieda_temperature
+        humidity_sensor: sensor.frieda_humidity
+      wohnzimmer:
+        friendly_name: Wohnzimmer Thermal
+        temperature_sensor: sensor.wohnzimmer_temperature
+        humidity_sensor: sensor.wohnzimmer_humidity
+      kuche:
+        friendly_name: Küche Thermal
+        temperature_sensor: sensor.kuche_temperature
+        humidity_sensor: sensor.kuche_humidity
+      ankleide:
+        friendly_name: Ankleide Thermal
+        temperature_sensor: sensor.ankleide_temperature
+        humidity_sensor: sensor.ankleide_humidity
+      schlafzimmer:
+        friendly_name: Schlafzimmer Thermal
+        temperature_sensor: sensor.schlafzimmer_temperature
+        humidity_sensor: sensor.schlafzimmer_humidity
+      flur:
+        friendly_name: Flur Thermal
+        temperature_sensor: sensor.temperature_25
+        humidity_sensor: sensor.humidity_26
+  - platform: history_stats
+    name: Work this week
+    entity_id: device_tracker.iphone_2
+    state: 'Work'
+    type: time
+    start: '{{ as_timestamp( now().replace(hour=0).replace(minute=0).replace(second=0) ) - now().weekday() * 86400 }}'
+    end: '{{ now() }}'
+  - platform: history_stats
+    name: Work today
+    entity_id: device_tracker.iphone_2
+    state: 'Work'
+    type: time
+    start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+    end: '{{ now() }}'
+  - platform: yr
+#  - platform: filesize
+#    file_paths:
+#      - /config/home-assistant_v2.db
+  - platform: systemmonitor
+    resources:
+      - type: processor_use
+      - type: memory_free
+      - type: disk_free
+        arg: /home
+      - type: last_boot
+      - type: load_15m
+  - platform: sql
+    db_url: !secret mysql_url
+    queries:
+      - name: HASS DB size
+        query: 'SELECT table_schema "database", Round(Sum(data_length + index_length) / 1048576, 2) "value" FROM information_schema.tables WHERE table_schema="homeassistant" GROUP BY table_schema;'
+        column: 'value'
+        unit_of_measurement: MB
+  - platform: darksky
+    api_key: !secret darksky_apikey
+    language: de
+    forecast:
+      - 1
+    hourly_forecast:
+      - 1
+    monitored_conditions:
+      - icon
+      - summary
+      - nearest_storm_distance
+      - nearest_storm_bearing
+      - humidity
+      - temperature
+      - temperature_high
+      - temperature_low
+      - apparent_temperature
+      - apparent_temperature_high
+      - apparent_temperature_low
+      - wind_speed
+      - wind_bearing
+      - precip_type
+      - precip_probability
+      - precip_accumulation
+      - precip_intensity
+      - precip_intensity_max
+      - uv_index
+      - daily_summary
+      - pressure
+      - visibility
+    scan_interval:
+      minutes: 10
+  - platform: template
+    sensors:
+      netatmo_windrichtung:
+        friendly_name: "Windrichtung"
+        unit_of_measurement: 'degrees'
+        value_template: "{{ states('sensor.netatmo_zuhause_windmessgerat_angle') | regex_findall_index('([0-9]+)',index=0,ignorecase=TRUE)  }}"
+      netatmo_windrichtung_boen:
+        friendly_name: "Windrichtung Böen"
+        unit_of_measurement: 'degrees'
+        value_template: "{{ states('sensor.netatmo_zuhause_windmessgerat_gust_angle') | regex_findall_index('([0-9]+)',index=0,ignorecase=TRUE)  }}"
+      netatmo_windrichtung_grob:
+        friendly_name: "Windrichtung grob"
+#        unit_of_measurement: 'compass'
+        value_template: "{{ states('sensor.netatmo_zuhause_windmessgerat_angle') | regex_findall_index('([NSWE]+)',index=0,ignorecase=TRUE)  }}"
+      netatmo_windrichtung_boen_grob:
+        friendly_name: "Windrichtung Böen grob"
+#        unit_of_measurement: 'compass'
+        value_template: "{{ states('sensor.netatmo_zuhause_windmessgerat_gust_angle') | regex_findall_index('([NSWE]+)',index=0,ignorecase=TRUE)  }}"
+
+    
+      count_lights_on:
+        friendly_name: "Count Lights On"
+        entity_id: sensor.time
+        value_template: >
+          {% set domain = 'light' %}
+          {% set state = 'on' %}
+          {% set count = states[domain] | selectattr('state','eq', state) | map(attribute='entity_id') | list | count %}
+          
+      count_doors_open:
+        friendly_name: "Count Doors Open"
+        entity_id: sensor.time
+        value_template: >
+          {% set domain = 'binary_sensor' %}
+          {% set state = 'on' %}
+          {% set count = states[domain] | selectattr('state','eq', state) | map(attribute='entity_id') | list | count %}
+
+      watch_push_title:
+        friendly_name: 'Watch Push Title'
+        entity_id: sensor.time
+        value_template: 'T{{states("sensor.sensor_hof_temperature")}}'
+        
+      watch_push_text:
+        friendly_name: 'Watch Push Text'
+        entity_id: sensor.time
+        value_template: 'L{{states("sensor.count_lights_on")}} H{{state_attr("climate.wohnzimmer", "preset_mode") [:1]}} A{{states("alarm_control_panel.alarmanlage") [:1]}} F{{states("sensor.count_doors_open")}}'
+  
+      tplink1_current_power:
+        friendly_name: 'TP Steckdose Watt aktuell'
+        value_template: '{{state_attr("switch.steckdose", "current_power_w")}}'
+        unit_of_measurement: W
+  
+      tplink1_total_energy_kwh:
+        friendly_name: 'TP Steckdose kwh Gesamt'
+        value_template: '{{state_attr("switch.steckdose", "total_energy_kwh")}}'
+        unit_of_measurement: kwh
+
+      tplink1_voltage:
+        friendly_name: 'TP Steckdose Volt Aktuell'
+        value_template: '{{state_attr("switch.steckdose", "voltage")}}'
+        unit_of_measurement: V
+
+      tplink1_current_a:
+        friendly_name: 'TP Steckdose Ampere Aktuell'
+        value_template: '{{state_attr("switch.steckdose", "current_a")}}'
+        unit_of_measurement: A
+
+      tplink1_today_energy_kwh:
+        friendly_name: 'TP Steckdose Watt aktuell'
+        value_template: '{{state_attr("switch.steckdose", "today_energy_kwh")}}'
+        unit_of_measurement: kwh
+        
+      luftdruck_terrasse2:
+        friendly_name: "Terasse Luftdruck angepasst2"
+        unit_of_measurement: hPa
+        value_template: >-
+          {{states.sensor.pressure_9.state | float + 20 }}
+
+# Text to speech
+tts:
+  - platform: google_translate
+    service_name: google_say
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+
+tado:
+  username: !secret tado_user
+  password: !secret tado_password
+  
+homekit:
+  auto_start: false
+  filter:
+    include_domains:
+      - light
+      - climate
+      - binary_sensor
+      - scene
+      - switch
+      - cover
+    include_entities:
+      - sensor.luftdruck_terrasse2
+      - sensor.temperature_7
+      - sensor.humidity_11
+      - sensor.bad_humidity
+      - sensor.eingang_light_level
+      - sensor.terrasse_absolutehumidity
+      - sensor.waescheraum_absolutehumidity
+      - sensor.wohnzimmer_humidity
+      - sensor.schlafzimmer_humidity
+      - sensor.humidity_8
+      - person.isabell
+      - person.dominik
+
+hue:
+  bridges:
+    - host: 192.168.178.35
+      allow_unreachable: true
+      allow_hue_groups: false
+  
+netatmo:
+  client_id: !secret netatmo_client_id
+  client_secret: !secret netatmo_client_secret
+  
+influxdb:
+  host: a0d7b954-influxdb
+  port: 8086
+  database: !secret influxdb_db
+  username: !secret influxdb_user
+  password: !secret influxdb_pw
+  max_retries: 3
+  default_measurement: state
+
+frontend:
+#  themes: !include themes.yaml
+  themes: !include_dir_merge_named themes
+      
+weather:
+  - platform: darksky
+    api_key: !secret darksky_apikey
+    mode: daily
+
+scene: !include scenes.yaml
+
+alarm_control_panel:
+  - platform: manual
+    name: Alarmanlage
+    pending_time: 0
+    delay_time: 0
+    trigger_time: 0
+    disarmed:
+      trigger_time: 0
+    armed_home:
+      pending_time: 0
+      delay_time: 0
+      trigger_time: 600
+    armed_away:
+      pending_time: 30
+      delay_time: 30
+      trigger_time: 600
+
+http:
+#  base_url: !secret base_url
+#  ssl_certificate: /ssl/fullchain.pem
+#  ssl_key: /ssl/privkey.pem
+
+discovery:
+  ignore:
+    - philips_hue
+
+recorder:
+  db_url: !secret db_url
+  purge_interval: 1
+  purge_keep_days: 7
+  exclude:
+    domains:
+    entities:
+      - sensor.bssid_4
+      - sensor.ssid_4
+      - sensor.yr_symbol
+      - remote.schalter_wohnzimmer
+      - sensor.connection_type_4
+      - sensor.ring_terrasse_volume
+      - sensor.ring_untergeschoss_volume
+      - sensor.ring_haustur_volume
+      
+lock:
+  - platform: nuki
+    host: 192.168.178.69
+    token: !secret nuki_token
+      
+#counter:
+#  - error_counter:
+#    name: Errors
+#    icon: mdi:alert
+#  - mailbox_counter:
+#    name: Briefkasten
+#    icon: mdi:mailbox-up
+
+notify:
+  - platform: group
+    name: all_admin_devices
+    services:
+    - service: mobile_app_ipad_pro
+    - service: mobile_app_iphone
+  - platform: group
+    name: all_ios_devices
+    services:
+    - service: mobile_app_ipad_pro
+    - service: mobile_app_ipad_zuhause
+    - service: mobile_app_iphone
+  - platform: group
+    name: all_devices
+    services:
+    - service: mobile_app_ipad_pro
+    - service: mobile_app_ipad_zuhause
+    - service: mobile_app_iphone
+    - service: mobile_app_sm_g930f
+
+input_boolean:
+  flash_run_alarm:
+    name: 'Boolean for Alarm Lights'
+    initial: off
+    icon: mdi:alarm-light
+
+device_tracker:
+  - platform: fritz
+    host: 192.168.178.1
+  
+calendar:
+  - platform: caldav
+    username: !secret caldav_user
+    password: !secret caldav_pw
+    url: https://caldav.icloud.com
+    calendars:
+      - Persönlich
+#  - platform: ics
+#    calendars:
+#    - name: "Isabell"
+#      url: !secret calender_url_isabell
+    
+#notify: !include notifications.yaml
+
+#webhook:
+#
+#zigbee2mqtt_networkmap:
+#  #topic: your topic (optional, default zigbee2mqtt)
+#panel_iframe:
+#  networkmap:
+#    title: 'Zigbee Map'
+#    url: '/local/community/zigbee2mqtt_networkmap/map.html'
+#    icon: 'mdi:graphql'
+
+panel_custom:
+  - name: floorplan
+    sidebar_title: Floorplan
+    sidebar_icon: mdi:home
+    url_path: floorplan
+    config: !include floorplan.yaml
